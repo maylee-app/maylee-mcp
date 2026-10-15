@@ -1,0 +1,37 @@
+name: Tool request
+description: Suggest a new tool, or a change to an existing one.
+title: "[Tool request]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Tell us what you would like your assistant to do in Maylee. The current tools are listed in [docs/TOOLS.md](https://github.com/maylee-app/maylee-mcp/blob/main/docs/TOOLS.md).
+  - type: textarea
+    id: goal
+    attributes:
+      label: What do you want to do?
+      description: The task, in your own words.
+    validations:
+      required: true
+  - type: textarea
+    id: prompt
+    attributes:
+      label: Example request to your assistant
+      placeholder: "Snooze this email until Monday at 9:00."
+  - type: dropdown
+    id: access
+    attributes:
+      label: What would the tool do?
+      options:
+        - Read only
+        - Organize or draft (labels, drafts, settings)
+        - Send or act outside the mailbox
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: today
+    attributes:
+      label: How do you do it today?
+      description: In the Maylee app, with several tool calls, or not at all.

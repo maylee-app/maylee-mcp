@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/maylee-app/maylee-mcp/blob/main/SECURITY.md
+    about: Please do not open a public issue. Email contact@maylee.app with the subject "Security".
+  - name: Help with your Maylee account
+    url: https://www.maylee.app
+    about: For questions about your account, your plan or your mailboxes, email contact@maylee.app.
+  - name: Documentation
+    url: https://docs.maylee.app/mcp
+    about: Setup guides, tools reference, permissions and limits.
