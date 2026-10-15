@@ -1,0 +1,26 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "app.maylee/maylee",
+  "title": "Maylee",
+  "description": "Maylee AI email: read, search, triage, draft and send; manage labels, views and AI label rules.",
+  "version": "1.0.0",
+  "websiteUrl": "https://maylee.app",
+  "icons": [
+    {
+      "src": "https://web.maylee.app/apple-touch-icon.png",
+      "mimeType": "image/png",
+      "sizes": ["180x180"]
+    },
+    {
+      "src": "https://web.maylee.app/icons/icon_512.png",
+      "mimeType": "image/png",
+      "sizes": ["512x512"]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://mcp.maylee.app/mcp"
+    }
+  ]
+}
