@@ -1,0 +1,48 @@
+name: Validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  schemas:
+    name: server.json and glama.json
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Install jsonschema
+        run: python -m pip install "jsonschema[format-nongpl]>=4.23,<5"
+
+      - name: Validate against the MCP registry and Glama schemas, check the icons
+        run: python scripts/validate_schemas.py --check-icons
+
+  docs:
+    name: Generated docs and JSON files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - name: docs/TOOLS.md and the README tool summary match tools.json
+        run: node scripts/generate-tools-md.mjs --check
+
+      - name: Every JSON file parses
+        run: |
+          git ls-files -z '*.json' | xargs -0 -n1 node -e '
+            const file = process.argv[1]
+            JSON.parse(require("node:fs").readFileSync(file, "utf8"))
+            console.log("ok", file)
+          '
