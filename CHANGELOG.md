@@ -2,8 +2,7 @@
 
 Notable changes to the Maylee MCP server. Versions match the `version` of [`server.json`](server.json).
 
-<!-- When the server goes live, replace "Unreleased" with the launch date (YYYY-MM-DD). -->
-## 1.0.0 (Unreleased)
+## 1.0.0 (2026-10-15)
 
 First public version.
 

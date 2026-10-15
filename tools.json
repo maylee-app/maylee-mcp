@@ -215,7 +215,7 @@
 		{
 			"name": "get_unread_counts",
 			"title": "Get unread counts",
-			"description": "Returns unread counts across the workspace, the same numbers as the badges in the Maylee sidebar: the main inbox (without the emails hidden by inbox filters), each custom view, each mailbox inbox, the waiting-for-reply list (sent emails still expecting an answer, read or not) and the unread emails hidden by inbox filters. Useful for a quick \"what is new\" summary before list_emails. The inbox and hidden counts stop at 1000 (inboxCapped or hiddenByFiltersCapped is then true); per-mailbox counts are taken from the same sample, so they are lower bounds when the inbox count is capped. Counts can be up to 30 seconds old.",
+			"description": "Returns unread counts across the workspace, the same numbers as the badges in the Maylee sidebar: the main inbox (without the emails hidden by inbox filters), each custom view, each mailbox inbox, the waiting-for-reply list (sent emails still expecting an answer, read or not) and the unread emails hidden by inbox filters. Useful for a quick \"what is new\" summary before list_emails. The inbox and hidden counts stop at 1000 (inboxCapped or hiddenByFiltersCapped is then true); per-mailbox counts are exact. Counts can be up to 30 seconds old.",
 			"toolset": "account",
 			"permission": "read",
 			"oauthOnly": false,

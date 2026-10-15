@@ -28,10 +28,6 @@
   <a href="#support">Support</a>
 </p>
 
-<!-- Remove this note when the server goes live. -->
-> [!NOTE]
-> **Rolling out.** The Maylee MCP server is being rolled out and does not answer at `https://mcp.maylee.app/mcp` yet. This page describes how it will work. Until then, the [Maylee REST API](https://docs.maylee.app/api-reference) is available.
-
 [Maylee](https://www.maylee.app) is an AI email client for Gmail, Microsoft 365 and IMAP mailboxes. This repository documents its official [Model Context Protocol](https://modelcontextprotocol.io) server: a hosted, remote server that gives an AI assistant access to **one Maylee workspace**, with the permissions you choose. The assistant can read, search and triage email, read attachments, prepare replies, forwards and new drafts, send or schedule them when you approve, and manage labels, AI label rules, views, inbox filters, auto-forward rules, signatures, snippets and notification settings.
 
 There is nothing to install: add the server URL to your assistant, sign in to Maylee, and pick what the assistant may do.
