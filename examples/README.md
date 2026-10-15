@@ -1,6 +1,6 @@
 # Client configurations
 
-Ready-to-copy configurations for the Maylee MCP server, `https://mcp.maylee.app/mcp`. Each client has an OAuth version, recommended: the client opens Maylee in your browser, you sign in, pick one workspace and the permissions. Clients that accept HTTP headers also have an API key version.
+Ready-to-copy configurations for the Maylee MCP server, `https://mcp.maylee.app/mcp`. Each client has an OAuth version, the recommended one: the client opens Maylee in your browser, where you sign in and pick one workspace and the permissions. Clients that accept HTTP headers also have an API key version.
 
 | Client | OAuth | API key | Where the file goes |
 | --- | --- | --- | --- |
