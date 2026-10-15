@@ -4,6 +4,9 @@
 //   node scripts/generate-tools-md.mjs           rewrite both files
 //   node scripts/generate-tools-md.mjs --check   exit 1 if either one is out of date
 //
+// It also sets the "$comment" of tools.json to the text below, so a freshly
+// generated tools.json can be copied in as is before running the script.
+//
 // No dependencies: Node.js 18 or later is enough.
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
@@ -28,8 +31,20 @@ const BLOCK_END = '<!-- generated:tools-summary:end -->'
 const COUNT_PATTERN = /\*\*\d+ tools?\*\* in \*\*\d+ toolsets?\*\*/g
 const EXTRAS_PATTERN = /plus \d+ prompts? and \d+ reference resources?/g
 
+const COMMENT =
+	'Generated from the tool definitions of the Maylee MCP server. Do not edit by hand.'
+
 const check = process.argv.includes('--check')
-const data = JSON.parse(readFileSync(TOOLS_JSON, 'utf8'))
+const toolsJson = readFileSync(TOOLS_JSON, 'utf8')
+const data = JSON.parse(toolsJson)
+
+/** tools.json with its "$comment" set to COMMENT, formatting untouched. */
+function withPublicComment(text) {
+	const value = JSON.stringify(COMMENT)
+	const pattern = /("\$comment"\s*:\s*)"(?:[^"\\]|\\.)*"/
+	if (pattern.test(text)) return text.replace(pattern, (_, key) => `${key}${value}`)
+	return text.replace(/^\{\r?\n/, (start) => `${start}\t"$comment": ${value},\n`)
+}
 
 /** Text that fits in one Markdown table cell. */
 function cell(text) {
@@ -255,12 +270,14 @@ function updateReadme(readme) {
 const toolsMd = buildToolsMd()
 const readme = readFileSync(README, 'utf8')
 const nextReadme = updateReadme(readme)
+const nextToolsJson = withPublicComment(toolsJson)
 
 if (check) {
 	const problems = []
 	const current = existsSync(TOOLS_MD) ? readFileSync(TOOLS_MD, 'utf8') : null
 	if (current !== toolsMd) problems.push('docs/TOOLS.md is out of date.')
 	if (nextReadme !== readme) problems.push('The tool summary in README.md is out of date.')
+	if (nextToolsJson !== toolsJson) problems.push('The "$comment" of tools.json is not the expected one.')
 	if (problems.length) {
 		console.error(
 			[...problems, 'Run "node scripts/generate-tools-md.mjs" and commit the result.'].join('\n')
@@ -271,5 +288,6 @@ if (check) {
 } else {
 	writeFileSync(TOOLS_MD, toolsMd)
 	writeFileSync(README, nextReadme)
+	if (nextToolsJson !== toolsJson) writeFileSync(TOOLS_JSON, nextToolsJson)
 	console.log(`Wrote docs/TOOLS.md and the README tool summary (${plural(total, 'tool')}).`)
 }
