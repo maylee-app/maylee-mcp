@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "maylee": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp.maylee.app/mcp"]
+    }
+  }
+}

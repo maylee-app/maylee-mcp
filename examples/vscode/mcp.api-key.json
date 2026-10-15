@@ -1,0 +1,19 @@
+{
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "maylee-api-key",
+      "description": "Maylee API key",
+      "password": true
+    }
+  ],
+  "servers": {
+    "maylee": {
+      "type": "http",
+      "url": "https://mcp.maylee.app/mcp",
+      "headers": {
+        "Authorization": "Bearer ${input:maylee-api-key}"
+      }
+    }
+  }
+}

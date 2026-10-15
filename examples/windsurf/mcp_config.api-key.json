@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "maylee": {
+      "url": "https://mcp.maylee.app/mcp",
+      "headers": {
+        "Authorization": "Bearer ${env:MAYLEE_API_KEY}"
+      }
+    }
+  }
+}

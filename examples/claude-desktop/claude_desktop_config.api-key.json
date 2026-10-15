@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "maylee": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://mcp.maylee.app/mcp",
+        "--header",
+        "Authorization:${MAYLEE_AUTH_HEADER}"
+      ],
+      "env": {
+        "MAYLEE_AUTH_HEADER": "Bearer mk_your_api_key"
+      }
+    }
+  }
+}
