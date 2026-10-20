@@ -2,7 +2,7 @@
 
 # Tools
 
-Version 1.0.0 of the Maylee MCP server exposes **69 tools** in **5 toolsets**, plus 3 prompts and 14 reference resources. This page is generated from [`tools.json`](../tools.json), which also describes every parameter and output field. The same reference, with examples, is published at [docs.maylee.app/mcp/tools](https://docs.maylee.app/mcp/tools).
+Version 1.0.0 of the Maylee MCP server exposes **69 tools** in **5 toolsets**, plus 3 prompts and 13 reference resources. This page is generated from [`tools.json`](../tools.json), which also describes every parameter and output field. The same reference, with examples, is published at [docs.maylee.app/mcp/tools](https://docs.maylee.app/mcp/tools).
 
 Back to the [README](../README.md).
 
@@ -152,7 +152,6 @@ The reference data used by the tools, one Markdown resource per topic. `get_refe
 | `maylee://reference/auto_forward_rules` | Auto-forward rules | Condition fields and modes of auto-forward rules, and when they run. |
 | `maylee://reference/inbox_filters` | Inbox filters | Inbox filter types (sender, domain, subject, label) and their effect. |
 | `maylee://reference/snippet_icons` | Snippet icons | Icon names accepted for snippets (smart links). |
-| `maylee://reference/signature_icons` | Signature icons | Icon names accepted for email signatures. |
 | `maylee://reference/folders_and_views` | Folders and system views | Maylee folders and built-in lists (waiting for reply, scheduled, hidden by filters). |
 | `maylee://reference/scheduling` | Scheduling | How scheduled sends work: local time format, allowed range, statuses. |
 | `maylee://reference/limits` | Limits and quotas | Rate limits, monthly quotas, bulk sizes, hourly safety budgets and field sizes. |

@@ -66,7 +66,7 @@ https://mcp.maylee.app/mcp
 - **Transport**: Streamable HTTP, stateless, JSON responses (`POST` only, no server-sent events).
 - **Authentication**: OAuth 2.1 (recommended) or a Maylee API key sent as a Bearer token.
 - **Scope**: one Maylee workspace per connection, with the permissions you grant.
-- **Tools**: **69 tools** in **5 toolsets**, plus 3 prompts and 14 reference resources.
+- **Tools**: **69 tools** in **5 toolsets**, plus 3 prompts and 13 reference resources.
 - **Plans**: every Maylee plan, within the API quota of the workspace (see [Quotas and limits](#quotas-and-limits)).
 - **Registry manifest**: [`server.json`](server.json), for the official MCP registry (`app.maylee/maylee`).
 

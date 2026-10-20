@@ -270,7 +270,7 @@
 		{
 			"name": "suggest_contacts",
 			"title": "Suggest contacts",
-			"description": "Finds people a mailbox has exchanged email with, to fill recipients correctly (for example \"email Julie from Acme\"): exact address matches first, then addresses and names starting with the query, each tier ranked by how often and how recently the mailbox wrote to and received from them. Without query it returns the most frequent correspondents. Only contacts of the given mailbox are searched, and only people who actually sent or received email with it (not an address book). Names come from email headers written by third parties. Fails with MAILBOX_NOT_FOUND for a mailbox outside this workspace.",
+			"description": "Finds people a mailbox has exchanged email with, to fill recipients correctly (for example \"email Julie from Acme\"): exact address matches first, then addresses and names starting with the query, then other partial matches (a word of the name, the domain), each tier ranked by how often and how recently the mailbox wrote to and received from them. The query needs a word of at least 2 characters; a shorter one returns nothing. Without query it returns the most frequent correspondents. Only contacts of the given mailbox are searched, and only people who actually sent or received email with it (not an address book). Names come from email headers written by third parties. Fails with MAILBOX_NOT_FOUND for a mailbox outside this workspace.",
 			"toolset": "account",
 			"permission": "read",
 			"oauthOnly": false,
@@ -382,7 +382,7 @@
 		{
 			"name": "get_notification_settings",
 			"title": "Get notification settings",
-			"description": "Returns the connected user's Maylee notification settings in this workspace. global.enabled is the master switch (off until the user turns notifications on in the app); soundEnabled plays a sound. schedule sets active hours: when enabled, notifications are only delivered between start and end (HH:MM, workspace timezone; start after end wraps past midnight) on the listed days. types says which events notify on each channel: newEmail, reply (someone answered an email the user sent), autoDraft, autoReply and replyReminder; web means browser and desktop, app means the mobile app. mailboxes and labels are mute switches: a mailbox set to false on a channel gets no notification on that channel, and a notification about an email carrying an AI label set to false on a channel is not delivered on that channel (labels lists AI labels only; everything is on by default). Settings are personal, so this tool is not available with an API key. Change them with update_notification_settings (or the user does it in the Maylee app, Settings, Notifications).",
+			"description": "Returns the connected user's Maylee notification settings in this workspace. global.enabled is the master switch (on by default); soundEnabled plays a sound. schedule sets active hours (HH:MM, workspace timezone; start after end wraps past midnight; listed days): when enabled, notifications arriving outside them are set aside and delivered when the active hours start again, alone or as one recap when several emails arrived (the daily reply reminder too: merged into that recap, or alone right after). types says which events notify on each channel: newEmail, reply (someone answered an email the user sent), autoDraft, autoReply and replyReminder; web means browser and desktop, app means the mobile app. newEmail is « All emails »: on, every new email notifies; off on a channel, only the new emails of the mailboxes and AI labels set to true for that channel notify there. mailboxes and labels are those inclusion lists (false by default; labels lists AI labels only, the labels Maylee sets before notifying); they never filter reply, autoDraft, autoReply or replyReminder. Settings are personal, so this tool is not available with an API key. Change them with update_notification_settings (or the user does it in the Maylee app, Settings, Notifications).",
 			"toolset": "account",
 			"permission": "read",
 			"oauthOnly": true,
@@ -410,24 +410,24 @@
 				{
 					"name": "types",
 					"type": "object",
-					"description": "Which events notify, per channel. Every event is on by default."
+					"description": "Which events notify, per channel. Every event is on by default. Turning newEmail off on a channel limits new emails to the picked mailboxes and labels."
 				},
 				{
 					"name": "mailboxes",
 					"type": "array of object",
-					"description": "Per mailbox mute switches (active mailboxes)."
+					"description": "Mailboxes picked for new email notifications when newEmail is off (inclusion list, false by default; active mailboxes)."
 				},
 				{
 					"name": "labels",
 					"type": "array of object",
-					"description": "Per AI label mute switches."
+					"description": "AI labels picked for new email notifications when newEmail is off (inclusion list, false by default)."
 				}
 			]
 		},
 		{
 			"name": "update_notification_settings",
 			"title": "Update notification settings",
-			"description": "Changes the connected user's Maylee notification settings in this workspace. Only what you pass changes; everything else keeps its value (read get_notification_settings first). global.enabled is the master switch and soundEnabled the sound. schedule sets active hours: when enabled, notifications are only delivered between start and end (HH:MM 24 h, workspace timezone; start after end wraps past midnight) on the listed days (mon to sun). types turns events on or off per channel: newEmail, reply, autoDraft, autoReply, replyReminder; web is browser and desktop, app is the mobile app. mailboxes and labels are MUTE switches, merged by id: set web or app to false to silence notifications about a mailbox, or about emails carrying an AI label (only AI labels, ids from list_labels), and true to allow them again. Maylee has no notification that fires when a label is applied: a labels entry only mutes or allows notifications about emails that carry it. Settings are personal, so this tool is not available with an API key. Returns the full settings after the change. Errors: INVALID_MAILBOX or INVALID_TAG (details.invalidIds) for ids outside this workspace or labels that are not AI labels.",
+			"description": "Changes the connected user's Maylee notification settings in this workspace. Only what you pass changes; everything else keeps its value (read get_notification_settings first). global.enabled is the master switch and soundEnabled the sound. schedule sets active hours (HH:MM 24 h, workspace timezone; start after end wraps past midnight; days mon to sun): when enabled, notifications arriving outside them are set aside and delivered when they start again, alone or as one recap. types turns events on or off per channel: newEmail, reply, autoDraft, autoReply, replyReminder; web is browser and desktop, app is the mobile app. newEmail is « All emails »: to be notified only about some emails, turn newEmail off on that channel and set the wanted mailboxes or labels to true. mailboxes and labels are INCLUSION lists, merged by id: true picks a mailbox, or an AI label (ids from list_labels), for that channel; false removes it. They only matter while newEmail is off on that channel, and never filter reply, autoDraft, autoReply or replyReminder. Maylee has no notification that fires when a label is applied: a picked label only lets through new emails that carry it on arrival. Settings are personal, so this tool is not available with an API key. Returns the full settings after the change. Errors: INVALID_MAILBOX or INVALID_TAG (details.invalidIds) for ids outside this workspace or labels that are not AI labels.",
 			"toolset": "account",
 			"permission": "write",
 			"oauthOnly": true,
@@ -471,7 +471,7 @@
 							"name": "enabled",
 							"type": "boolean",
 							"required": false,
-							"description": "true limits delivery to the active hours. Omit to keep."
+							"description": "true sets aside what arrives outside the active hours until they start again. Omit to keep."
 						},
 						{
 							"name": "start",
@@ -512,7 +512,7 @@
 							"name": "newEmail",
 							"type": "object",
 							"required": false,
-							"description": "A new email arrives in the inbox.",
+							"description": "All emails: every new email received in the inbox. When off on a channel, only the new emails of the mailboxes and AI labels picked for that channel notify there.",
 							"children": [
 								{
 									"name": "web",
@@ -614,7 +614,7 @@
 					"name": "mailboxes",
 					"type": "array of object (0 to 100)",
 					"required": false,
-					"description": "Per mailbox mute switches to change, merged by id.",
+					"description": "Mailboxes to pick or remove, merged by id.",
 					"children": [
 						{
 							"name": "mailboxId",
@@ -626,13 +626,13 @@
 							"name": "web",
 							"type": "boolean",
 							"required": false,
-							"description": "false mutes browser and desktop notifications."
+							"description": "true picks it for browser and desktop (used while newEmail.web is off), false removes it."
 						},
 						{
 							"name": "app",
 							"type": "boolean",
 							"required": false,
-							"description": "false mutes mobile app notifications."
+							"description": "true picks it for the mobile app (used while newEmail.app is off), false removes it."
 						}
 					]
 				},
@@ -640,7 +640,7 @@
 					"name": "labels",
 					"type": "array of object (0 to 100)",
 					"required": false,
-					"description": "Per AI label mute switches to change, merged by id.",
+					"description": "AI labels to pick or remove, merged by id.",
 					"children": [
 						{
 							"name": "labelId",
@@ -652,13 +652,13 @@
 							"name": "web",
 							"type": "boolean",
 							"required": false,
-							"description": "false: no browser or desktop notification about emails carrying this AI label."
+							"description": "true picks it for browser and desktop (used while newEmail.web is off), false removes it."
 						},
 						{
 							"name": "app",
 							"type": "boolean",
 							"required": false,
-							"description": "false: no mobile app notification about emails carrying this AI label."
+							"description": "true picks it for the mobile app (used while newEmail.app is off), false removes it."
 						}
 					]
 				}
@@ -677,17 +677,17 @@
 				{
 					"name": "types",
 					"type": "object",
-					"description": "Which events notify, per channel. Every event is on by default."
+					"description": "Which events notify, per channel. Every event is on by default. Turning newEmail off on a channel limits new emails to the picked mailboxes and labels."
 				},
 				{
 					"name": "mailboxes",
 					"type": "array of object",
-					"description": "Per mailbox mute switches (active mailboxes)."
+					"description": "Mailboxes picked for new email notifications when newEmail is off (inclusion list, false by default; active mailboxes)."
 				},
 				{
 					"name": "labels",
 					"type": "array of object",
-					"description": "Per AI label mute switches."
+					"description": "AI labels picked for new email notifications when newEmail is off (inclusion list, false by default)."
 				}
 			]
 		},
@@ -2075,7 +2075,7 @@
 					"name": "signature",
 					"type": "string (1 to 64 chars)",
 					"required": false,
-					"description": "\"auto\" (default) picks the signature Maylee would use for this sender (alias-specific, then mailbox, then workspace-wide), like the app does. \"none\" adds no signature. Or a signature id from list_signatures.",
+					"description": "\"auto\" (default) adds the signature Maylee would use for the sending address, like the app does: the one assigned to that address, or for a send-as alias without its own, the one of its mailbox address; none if the address has none or is set to \"No signature\". \"none\" adds no signature. Or a signature id from list_signatures.",
 					"default": "auto"
 				},
 				{
@@ -2625,7 +2625,7 @@
 					"name": "signature",
 					"type": "string (1 to 64 chars)",
 					"required": false,
-					"description": "\"auto\" (default) picks the signature Maylee would use for this sender (alias-specific, then mailbox, then workspace-wide), like the app does. \"none\" adds no signature. Or a signature id from list_signatures.",
+					"description": "\"auto\" (default) adds the signature Maylee would use for the sending address, like the app does: the one assigned to that address, or for a send-as alias without its own, the one of its mailbox address; none if the address has none or is set to \"No signature\". \"none\" adds no signature. Or a signature id from list_signatures.",
 					"default": "auto"
 				},
 				{
@@ -2790,7 +2790,7 @@
 					"name": "signature",
 					"type": "string (1 to 64 chars)",
 					"required": false,
-					"description": "\"auto\" (default) picks the signature Maylee would use for this sender (alias-specific, then mailbox, then workspace-wide), like the app does. \"none\" adds no signature. Or a signature id from list_signatures.",
+					"description": "\"auto\" (default) adds the signature Maylee would use for the sending address, like the app does: the one assigned to that address, or for a send-as alias without its own, the one of its mailbox address; none if the address has none or is set to \"No signature\". \"none\" adds no signature. Or a signature id from list_signatures.",
 					"default": "auto"
 				},
 				{
@@ -3009,7 +3009,7 @@
 					"name": "signature",
 					"type": "string (1 to 64 chars)",
 					"required": false,
-					"description": "\"auto\" (default) picks the signature Maylee would use for this sender (alias-specific, then mailbox, then workspace-wide), like the app does. \"none\" adds no signature. Or a signature id from list_signatures.",
+					"description": "\"auto\" (default) adds the signature Maylee would use for the sending address, like the app does: the one assigned to that address, or for a send-as alias without its own, the one of its mailbox address; none if the address has none or is set to \"No signature\". \"none\" adds no signature. Or a signature id from list_signatures.",
 					"default": "auto"
 				},
 				{
@@ -3568,7 +3568,7 @@
 		{
 			"name": "list_signatures",
 			"title": "List signatures",
-			"description": "Lists the email signatures of the workspace with their scope: a specific send-as alias of a mailbox (mailboxId and aliasEmail), a whole mailbox (mailboxId only), or the whole workspace (both null). With signature auto, the compose tools pick the most specific one for the sender: alias, then mailbox, then workspace, lowest position first. Pass a signature id as signature to force another one.",
+			"description": "Lists the email signatures of the workspace with the sending addresses each one is assigned to. With signature auto, the compose tools add the signature of the sending address; an alias without its own signature gets the one of its mailbox address; an address set to \"No signature\" in the app gets none, and so does an address without any. Pass a signature id as signature to force another one.",
 			"toolset": "compose",
 			"permission": "read",
 			"oauthOnly": false,
@@ -3593,7 +3593,7 @@
 		{
 			"name": "create_signature",
 			"title": "Create a signature",
-			"description": "Creates an email signature (HTML). Scope it to a mailbox (mailboxId), to one verified send-as alias of that mailbox (mailboxId and aliasEmail), or leave both empty for the whole workspace. iconName is the icon shown in the signature picker, one of: Pencil, Signature, Users, Shield, Idea, Send, Zap, Sparkles, Pen (get_reference topic signature_icons). Call list_signatures first to avoid duplicates. Example: { \"name\": \"Sales\", \"iconName\": \"Signature\", \"contentHtml\": \"<p>Julie Martin<br>Sales, Acme</p>\", \"mailboxId\": \"<id>\" }.",
+			"description": "Creates an email signature (HTML) and assigns it to sending addresses: a mailbox address or one of its verified send-as aliases (list_mailboxes). An address carries at most one signature, so an address already used by another signature moves to this one. Without addresses the signature exists but is only added when chosen by id. Call list_signatures first to avoid duplicates. Example: { \"name\": \"Sales\", \"contentHtml\": \"<p>Julie Martin<br>Sales, Acme</p>\", \"addresses\": [{ \"mailboxId\": \"<id>\", \"email\": \"julie@acme.com\" }] }.",
 			"toolset": "compose",
 			"permission": "write",
 			"oauthOnly": false,
@@ -3611,24 +3611,7 @@
 					"name": "name",
 					"type": "string (1 to 80 chars)",
 					"required": true,
-					"description": "Name shown in the signature picker, 1 to 80 characters."
-				},
-				{
-					"name": "iconName",
-					"type": "string",
-					"required": true,
-					"description": "Icon of the signature in the picker, case-sensitive: Pencil, Signature, Users, Shield, Idea, Send, Zap, Sparkles, Pen.",
-					"enum": [
-						"Pencil",
-						"Signature",
-						"Users",
-						"Shield",
-						"Idea",
-						"Send",
-						"Zap",
-						"Sparkles",
-						"Pen"
-					]
+					"description": "Name shown in the signature list, 1 to 80 characters."
 				},
 				{
 					"name": "contentHtml",
@@ -3637,16 +3620,24 @@
 					"description": "Signature content as HTML, up to 32768 characters, for example \"<p>Julie Martin<br>Sales, Acme</p>\". Scripts and unsafe markup are removed."
 				},
 				{
-					"name": "mailboxId",
-					"type": "string",
+					"name": "addresses",
+					"type": "array of object (0 to 200)",
 					"required": false,
-					"description": "Mailbox the signature is for. Omit for the whole workspace."
-				},
-				{
-					"name": "aliasEmail",
-					"type": "string (0 to 320 chars)",
-					"required": false,
-					"description": "A verified send-as alias of mailboxId (list_mailboxes). Omit to cover every address of the mailbox."
+					"description": "Sending addresses to assign it to. Omit for none.",
+					"children": [
+						{
+							"name": "mailboxId",
+							"type": "string",
+							"required": true,
+							"description": "Mailbox id (list_mailboxes)."
+						},
+						{
+							"name": "email",
+							"type": "string (0 to 320 chars)",
+							"required": true,
+							"description": "The mailbox address, or one of its verified send-as aliases (sendAsAliases in list_mailboxes)."
+						}
+					]
 				},
 				{
 					"name": "position",
@@ -3670,12 +3661,7 @@
 				{
 					"name": "name",
 					"type": "string",
-					"description": "Name shown in the signature picker."
-				},
-				{
-					"name": "iconName",
-					"type": "string",
-					"description": "Icon shown in the picker (get_reference topic signature_icons)."
+					"description": "Name shown in the signature list."
 				},
 				{
 					"name": "contentHtml",
@@ -3683,19 +3669,14 @@
 					"description": "Signature content, HTML."
 				},
 				{
-					"name": "mailboxId",
-					"type": "string or null",
-					"description": "Mailbox the signature is scoped to; null for the whole workspace."
-				},
-				{
-					"name": "aliasEmail",
-					"type": "string or null",
-					"description": "Send-as alias of that mailbox the signature is scoped to; null for every address of the mailbox."
+					"name": "addresses",
+					"type": "array of object",
+					"description": "Sending addresses this signature is assigned to. An address has at most one signature. Empty: the signature is never added automatically, only when chosen by id."
 				},
 				{
 					"name": "position",
 					"type": "integer",
-					"description": "Order in the picker (lower first)."
+					"description": "Order in the list (lower first)."
 				},
 				{
 					"name": "createdAt",
@@ -3712,7 +3693,7 @@
 		{
 			"name": "update_signature",
 			"title": "Edit a signature",
-			"description": "Changes a signature's name, icon, content, scope or position. Only the fields you pass change. Set mailboxId null to make it workspace-wide, or aliasEmail null to cover every address of its mailbox; moving it to another mailbox without a new aliasEmail removes its alias. iconName is one of: Pencil, Signature, Users, Shield, Idea, Send, Zap, Sparkles, Pen. Images no longer used by the new content are deleted.",
+			"description": "Changes a signature's name, content, sending addresses or position. Only the fields you pass change. addresses is the COMPLETE list: addresses left out are freed (an alias then falls back to its mailbox address signature), and an address used by another signature moves to this one; pass [] to unassign it everywhere. Images no longer used by the new content are deleted.",
 			"toolset": "compose",
 			"permission": "write",
 			"oauthOnly": false,
@@ -3736,24 +3717,7 @@
 					"name": "name",
 					"type": "string (1 to 80 chars)",
 					"required": false,
-					"description": "Name shown in the signature picker, 1 to 80 characters."
-				},
-				{
-					"name": "iconName",
-					"type": "string",
-					"required": false,
-					"description": "Icon of the signature in the picker, case-sensitive: Pencil, Signature, Users, Shield, Idea, Send, Zap, Sparkles, Pen.",
-					"enum": [
-						"Pencil",
-						"Signature",
-						"Users",
-						"Shield",
-						"Idea",
-						"Send",
-						"Zap",
-						"Sparkles",
-						"Pen"
-					]
+					"description": "Name shown in the signature list, 1 to 80 characters."
 				},
 				{
 					"name": "contentHtml",
@@ -3762,16 +3726,24 @@
 					"description": "Signature content as HTML, up to 32768 characters, for example \"<p>Julie Martin<br>Sales, Acme</p>\". Scripts and unsafe markup are removed."
 				},
 				{
-					"name": "mailboxId",
-					"type": "string or null",
+					"name": "addresses",
+					"type": "array of object (0 to 200)",
 					"required": false,
-					"description": "New mailbox scope, or null for the whole workspace."
-				},
-				{
-					"name": "aliasEmail",
-					"type": "string (0 to 320 chars) or null",
-					"required": false,
-					"description": "New alias scope (a verified send-as alias of the mailbox), or null for every address of the mailbox."
+					"description": "New complete list of sending addresses. Omit to keep the current ones.",
+					"children": [
+						{
+							"name": "mailboxId",
+							"type": "string",
+							"required": true,
+							"description": "Mailbox id (list_mailboxes)."
+						},
+						{
+							"name": "email",
+							"type": "string (0 to 320 chars)",
+							"required": true,
+							"description": "The mailbox address, or one of its verified send-as aliases (sendAsAliases in list_mailboxes)."
+						}
+					]
 				},
 				{
 					"name": "position",
@@ -3789,12 +3761,7 @@
 				{
 					"name": "name",
 					"type": "string",
-					"description": "Name shown in the signature picker."
-				},
-				{
-					"name": "iconName",
-					"type": "string",
-					"description": "Icon shown in the picker (get_reference topic signature_icons)."
+					"description": "Name shown in the signature list."
 				},
 				{
 					"name": "contentHtml",
@@ -3802,19 +3769,14 @@
 					"description": "Signature content, HTML."
 				},
 				{
-					"name": "mailboxId",
-					"type": "string or null",
-					"description": "Mailbox the signature is scoped to; null for the whole workspace."
-				},
-				{
-					"name": "aliasEmail",
-					"type": "string or null",
-					"description": "Send-as alias of that mailbox the signature is scoped to; null for every address of the mailbox."
+					"name": "addresses",
+					"type": "array of object",
+					"description": "Sending addresses this signature is assigned to. An address has at most one signature. Empty: the signature is never added automatically, only when chosen by id."
 				},
 				{
 					"name": "position",
 					"type": "integer",
-					"description": "Order in the picker (lower first)."
+					"description": "Order in the list (lower first)."
 				},
 				{
 					"name": "createdAt",
@@ -5843,7 +5805,7 @@
 					"name": "topic",
 					"type": "string",
 					"required": true,
-					"description": "Which reference to return. overview: Maylee concepts and toolsets. label_colors: the seven label colors. view_icons: emoji icons for views. view_filters: filter grammar and examples for views and list_emails. ai_label_rules: AI label rule options. auto_forward_rules and inbox_filters: their options. snippet_icons and signature_icons: accepted icon names. folders_and_views: folders and system views. scheduling: scheduled send rules. limits: quotas, bulk sizes, field sizes. permissions: read, write, send. security: safety rules. all: everything.",
+					"description": "Which reference to return. overview: Maylee concepts and toolsets. label_colors: the seven label colors. view_icons: emoji icons for views. view_filters: filter grammar and examples for views and list_emails. ai_label_rules: AI label rule options. auto_forward_rules and inbox_filters: their options. snippet_icons: accepted snippet icon names. folders_and_views: folders and system views. scheduling: scheduled send rules. limits: quotas, bulk sizes, field sizes. permissions: read, write, send. security: safety rules. all: everything.",
 					"enum": [
 						"all",
 						"overview",
@@ -5854,7 +5816,6 @@
 						"auto_forward_rules",
 						"inbox_filters",
 						"snippet_icons",
-						"signature_icons",
 						"folders_and_views",
 						"scheduling",
 						"limits",
@@ -5866,7 +5827,7 @@
 			"output": [
 				{
 					"name": "topic",
-					"type": "all, overview, label_colors, view_icons, view_filters, ai_label_rules, auto_forward_rules, inbox_filters, snippet_icons, signature_icons, folders_and_views, scheduling, limits, permissions, security",
+					"type": "all, overview, label_colors, view_icons, view_filters, ai_label_rules, auto_forward_rules, inbox_filters, snippet_icons, folders_and_views, scheduling, limits, permissions, security",
 					"description": "The topic returned."
 				},
 				{
@@ -5922,11 +5883,6 @@
 			"uri": "maylee://reference/snippet_icons",
 			"title": "Snippet icons",
 			"description": "Icon names accepted for snippets (smart links)."
-		},
-		{
-			"uri": "maylee://reference/signature_icons",
-			"title": "Signature icons",
-			"description": "Icon names accepted for email signatures."
 		},
 		{
 			"uri": "maylee://reference/folders_and_views",
@@ -6002,7 +5958,7 @@
 			"topic": "overview",
 			"title": "Maylee in a nutshell",
 			"description": "What a Maylee workspace contains and how the tools are organized.",
-			"markdown": "# Maylee in a nutshell\n\nMaylee is an AI email client. This server gives access to ONE workspace, chosen by the user when connecting. A workspace has one or more connected mailboxes (Gmail, Microsoft 365 or IMAP) and shared settings: labels, AI label rules, views, inbox filters, auto-forward rules, signatures and snippets.\n\n## Concepts\n- Folders: INBOX, SENT, DRAFTS, SPAM, TRASH. There is no archive.\n- Labels are manual (applied by the user or by you) or AI labels (applied automatically to new incoming emails by an AI label rule written in plain language). Seven colors: Pink, Blue, Red, Yellow, Green, Purple, Orange.\n- Views are saved filters shown in the sidebar, each with an emoji icon.\n- Inbox filters and AI labels with hideFromInbox keep emails out of the main inbox without moving them.\n- Pinned is the Maylee star; it is not synced to Gmail or Outlook stars.\n- Waiting for reply lists sent emails that still expect an answer; reply reminders list received emails the user still has to answer.\n- Drafts created through this server appear instantly in the Maylee app, where the user can review them.\n\n## Toolsets\n| Toolset | What it covers |\n| --- | --- |\n| account | Workspace and connection, mailboxes, sync, unread counts, contacts, reply reminders, notification settings, timezone. |\n| emails | List, search and read emails, threads and attachments; mark read, pin, move, trash, label; waiting for reply; unsubscribe. |\n| compose | Drafts, replies, forwards, sending, scheduling, attachments, automatic replies, Magic Reply, signatures, snippets. |\n| config | Labels, AI label rules, views, inbox filters, auto-forward rules. |\n| reference | get_reference: label colors, view icons, the filter grammar, rule options, limits and safety rules. |\n\nClients can load only some toolsets by adding `?toolsets=emails,compose` to the server URL.\n\n## Reference topics\n- `overview`\n- `label_colors`\n- `view_icons`\n- `view_filters`\n- `ai_label_rules`\n- `auto_forward_rules`\n- `inbox_filters`\n- `snippet_icons`\n- `signature_icons`\n- `folders_and_views`\n- `scheduling`\n- `limits`\n- `permissions`\n- `security`",
+			"markdown": "# Maylee in a nutshell\n\nMaylee is an AI email client. This server gives access to ONE workspace, chosen by the user when connecting. A workspace has one or more connected mailboxes (Gmail, Microsoft 365 or IMAP) and shared settings: labels, AI label rules, views, inbox filters, auto-forward rules, signatures and snippets.\n\n## Concepts\n- Folders: INBOX, SENT, DRAFTS, SPAM, TRASH. There is no archive.\n- Labels are manual (applied by the user or by you) or AI labels (applied automatically to new incoming emails by an AI label rule written in plain language). Seven colors: Pink, Blue, Red, Yellow, Green, Purple, Orange.\n- Views are saved filters shown in the sidebar, each with an emoji icon.\n- Inbox filters and AI labels with hideFromInbox keep emails out of the main inbox without moving them.\n- Pinned is the Maylee star; it is not synced to Gmail or Outlook stars.\n- Waiting for reply lists sent emails that still expect an answer; reply reminders list received emails the user still has to answer.\n- Drafts created through this server appear instantly in the Maylee app, where the user can review them.\n\n## Toolsets\n| Toolset | What it covers |\n| --- | --- |\n| account | Workspace and connection, mailboxes, sync, unread counts, contacts, reply reminders, notification settings, timezone. |\n| emails | List, search and read emails, threads and attachments; mark read, pin, move, trash, label; waiting for reply; unsubscribe. |\n| compose | Drafts, replies, forwards, sending, scheduling, attachments, automatic replies, Magic Reply, signatures, snippets. |\n| config | Labels, AI label rules, views, inbox filters, auto-forward rules. |\n| reference | get_reference: label colors, view icons, the filter grammar, rule options, limits and safety rules. |\n\nClients can load only some toolsets by adding `?toolsets=emails,compose` to the server URL.\n\n## Reference topics\n- `overview`\n- `label_colors`\n- `view_icons`\n- `view_filters`\n- `ai_label_rules`\n- `auto_forward_rules`\n- `inbox_filters`\n- `snippet_icons`\n- `folders_and_views`\n- `scheduling`\n- `limits`\n- `permissions`\n- `security`",
 			"data": {
 				"toolsets": [
 					"account",
@@ -6020,7 +5976,6 @@
 					"auto_forward_rules",
 					"inbox_filters",
 					"snippet_icons",
-					"signature_icons",
 					"folders_and_views",
 					"scheduling",
 					"limits",
@@ -6705,25 +6660,6 @@
 					"Star",
 					"Heart",
 					"Briefcase",
-					"Users",
-					"Shield",
-					"Idea",
-					"Send",
-					"Zap",
-					"Sparkles",
-					"Pen"
-				]
-			}
-		},
-		{
-			"topic": "signature_icons",
-			"title": "Signature icons",
-			"description": "Icon names accepted for email signatures.",
-			"markdown": "# Signature icons\n\nSignatures use one of these icon names, exactly as written (shown in the signature picker):\n\n`Pencil`, `Signature`, `Users`, `Shield`, `Idea`, `Send`, `Zap`, `Sparkles`, `Pen`",
-			"data": {
-				"iconNames": [
-					"Pencil",
-					"Signature",
 					"Users",
 					"Shield",
 					"Idea",
